@@ -17,7 +17,7 @@ def moveForward(speed, distance):
 		time.sleep(waitTime)
 		sp.write(("#24 P1200 T%i\r" %speed).encode())
 		time.sleep(waitTime)
-		sp.write(("#25 P2215 T%s\r" %speed).encode())
+		sp.write(("#25 P2215 T%i\r" %speed).encode())
 		
 		time.sleep(waitTime)
 

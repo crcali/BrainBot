@@ -211,4 +211,8 @@ sp.close()
 isClosed = sp.is_open
 while isClosed == True:
 	sp.close
+<<<<<<< HEAD
 	isClosed = sp.is_open
+=======
+	isClosed = sp.is_open
+>>>>>>> 98ab79f52aa99736745abe38ef31d1a41ab9842b

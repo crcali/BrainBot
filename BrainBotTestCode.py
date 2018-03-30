@@ -36,7 +36,6 @@ def moveForward(speed, distance):
 		sp.write(("#16 P1000 T%i\r" %speed).encode())
 		time.sleep(waitTime)
 		sp.write(("#17 P1600 T%i\r" %speed).encode())
-		time.sleep(waitTime)
 
 		time.sleep(waitTime)
 
@@ -46,7 +45,6 @@ def moveForward(speed, distance):
 		sp.write(("#8 P1900 T%i\r" %speed).encode())
 		time.sleep(waitTime)
 		sp.write(("#9 P2250 T%i\r" %speed).encode())
-		time.sleep(waitTime)
 
 		time.sleep(waitTime)
 
@@ -75,7 +73,7 @@ def moveBackward(speed, distance):
 	#lifts up second leg 
 	sp.write(("#1 P1535 T%i\r" %speed).encode())
 	time.sleep(waitTime)
-	sp.write(("#0 P1000 T%i\r" %speed).encode())
+	sp.write(("#0 P1950 T%i\r" %speed).encode())
 	time.sleep(waitTime)
 	sp.write(("#1 P2150 T%i\r" %speed).encode())
 
@@ -87,7 +85,6 @@ def moveBackward(speed, distance):
 	sp.write(("#16 P1900 T%i\r" %speed).encode())
 	time.sleep(waitTime)
 	sp.write(("#17 P1600 T%i\r" %speed).encode())
-	time.sleep(waitTime)
 
 	time.sleep(waitTime)
 
@@ -97,7 +94,6 @@ def moveBackward(speed, distance):
 	sp.write(("#8 P900 T%i\r" %speed).encode())
 	time.sleep(waitTime)
 	sp.write(("#9 P2250 T%i\r" %speed).encode())
-	time.sleep(waitTime)
 
 	time.sleep(waitTime)
 
@@ -109,59 +105,102 @@ def moveBackward(speed, distance):
 #sets up the move backward module
 def turn(speed, degrees):
 	#commands to move backward with the parameters
-	numberOfTimes = degrees
+	numberOfTimes = degrees/45
 
 	waitTime = (speed/1000)+.25
 
-	#!!run for x in range command when distance is refined!! 
-	#lifts up first leg 
-	sp.write(("#25 P1600 T%i\r" %speed).encode())
-	time.sleep(waitTime)
-	sp.write(("#24 P2200 T%i\r" %speed).encode())
-	time.sleep(waitTime)
-	sp.write(("#25 P2215 T%i\r" %speed).encode())
-	
-	time.sleep(waitTime)
+	for x in range (0,numberOfTimes):
+		#lifts up first leg 
+		sp.write(("#25 P1600 T%i\r" %speed).encode())
+		time.sleep(waitTime)
+		sp.write(("#24 P2700 T%i\r" %speed).encode())
+		time.sleep(waitTime)
+		sp.write(("#25 P2215 #26 P1450 T%i\r" %speed).encode())
+		
+		time.sleep(waitTime)
 
-	#lifts up second leg 
-	sp.write(("#1 P1535 T%i\r" %speed).encode())
-	time.sleep(waitTime)
-	sp.write(("#0 P1000 T%i\r" %speed).encode())
-	time.sleep(waitTime)
-	sp.write(("#1 P2150 T%i\r" %speed).encode())
+		#lifts up second leg 
+		sp.write(("#1 P1535 T%i\r" %speed).encode())
+		time.sleep(waitTime)
+		sp.write(("#0 P2300 T%i\r" %speed).encode())
+		time.sleep(waitTime)
+		sp.write(("#1 P2150 T%i\r" %speed).encode())
 
-	time.sleep(waitTime)
+		time.sleep(waitTime)
 
-	#lifts up third leg 
-	sp.write(("#17 P2500 T%i\r" %speed).encode())
-	time.sleep(waitTime)
-	sp.write(("#16 P1900 T%i\r" %speed).encode())
-	time.sleep(waitTime)
-	sp.write(("#17 P1600 T%i\r" %speed).encode())
-	time.sleep(waitTime)
+		#lifts up third leg 
+		sp.write(("#17 P2500 T%i\r" %speed).encode())
+		time.sleep(waitTime)
+		sp.write(("#16 P2300 T%i\r" %speed).encode())
+		time.sleep(waitTime)
+		sp.write(("#17 P1600 T%i\r" %speed).encode())
 
-	time.sleep(waitTime)
+		time.sleep(waitTime)
 
-	#lifts up forth leg 
-	sp.write(("#9 P1600 T%i\r" %speed).encode())
-	time.sleep(waitTime)
-	sp.write(("#8 P900 T%i\r" %speed).encode())
-	time.sleep(waitTime)
-	sp.write(("#9 P2250 T%i\r" %speed).encode())
-	time.sleep(waitTime)
+		#lifts up forth leg 
+		sp.write(("#9 P1600 T%i\r" %speed).encode())
+		time.sleep(waitTime)
+		sp.write(("#8 P2350 T%i\r" %speed).encode())
+		time.sleep(waitTime)
+		sp.write(("#9 P2250 T%i\r" %speed).encode())
+		time.sleep(waitTime)
 
-	time.sleep(waitTime)
+		time.sleep(waitTime)
 
-	#moves body 
-	sp.write(("#0 P1425 #8 P1500 #16 P1500 #24 P1600 #26 P1250 T400\r").encode())
+		#moves body forward
+		sp.write(("#0 P1425 #8 P1500 #16 P1500 #24 P1600 #26 P1250 T400\r").encode())
 
-	time.sleep(waitTime)
+		time.sleep(waitTime)
+
+		#fine tunes the turning for more accurate movement
+
+		#lifts up first leg 
+		sp.write(("#25 P1600 T%i\r" %speed).encode())
+		time.sleep(waitTime)
+		sp.write(("#24 P1650 T%i\r" %speed).encode())
+		time.sleep(waitTime)
+		sp.write(("#25 P2215 #26 P1450 T%i\r" %speed).encode())
+		
+		time.sleep(waitTime)
+
+		#lifts up second leg 
+		sp.write(("#1 P1535 T%i\r" %speed).encode())
+		time.sleep(waitTime)
+		sp.write(("#0 P1475 T%i\r" %speed).encode())
+		time.sleep(waitTime)
+		sp.write(("#1 P2150 T%i\r" %speed).encode())
+
+		time.sleep(waitTime)
+
+		#lifts up third leg 
+		sp.write(("#17 P2500 T%i\r" %speed).encode())
+		time.sleep(waitTime)
+		sp.write(("#16 P1650 T%i\r" %speed).encode())
+		time.sleep(waitTime)
+		sp.write(("#17 P1600 T%i\r" %speed).encode())
+
+		time.sleep(waitTime)
+
+		#lifts up forth leg 
+		sp.write(("#9 P1600 T%i\r" %speed).encode())
+		time.sleep(waitTime)
+		sp.write(("#8 P1650 T%i\r" %speed).encode())
+		time.sleep(waitTime)
+		sp.write(("#9 P2250 T%i\r" %speed).encode())
+		time.sleep(waitTime)
+
+		time.sleep(waitTime)
+
+		#moves body forward
+		sp.write(("#0 P1425 #8 P1500 #16 P1500 #24 P1600 #26 P1250 T400\r").encode())
+
+		time.sleep(waitTime)
 
 #the defult, rest position 
 def defultPosition():
 
 	# set the servos to the inital position
-	sp.write("#0 P1425 #1 P2150 #2 P1625 #8 P1500 #9 P2300 #10 P1500 #16 P1500 #17 P1600 #18 P1475 #24 P1600 #25 P2215 #26 P1450 T.5\r".encode())
+	sp.write("#0 P1425 #1 P2250 #2 P1625 #8 P1500 #9 P2300 #10 P1500 #16 P1500 #17 P1600 #18 P1475 #24 P1600 #25 P2215 #26 P1450 T.5\r".encode())
 
 #runs all the modules and gets user input
 while True: 

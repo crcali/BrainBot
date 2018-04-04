@@ -1,8 +1,11 @@
 import serial
 import time
 
-#open a serial port
-sp = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
+#opens the serial port over Bluetooth
+sp = serial.Serial('/dev/ttyACM0', 9600, timeout=0)
+
+#opens the serial port through a USB-to-Serial cable
+#sp = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
 
 def moveServo(servoNumber, position, speed, waitTime):
 	sp.write(("#%i P%i T%i\r" %(servoNumber, position, speed)).encode())
@@ -16,27 +19,37 @@ def moveForward(speed, distance):
 	waitTime = (speed/1000)+.25
 
 	for x in range (0,numberOfTimes):
-		#lifts up first leg 
+		#lifts up first leg and ensures the robot maintains proper balance
+		sp.write(("#2 P500 #8 P1950 T750\r").encode())
+		time.sleep(1.75)
 		moveServo(25, 1600, speed, waitTime)
 		moveServo(24, 1200, speed, waitTime)
 		sp.write(("#25 P2215 #26 P1450 T%i\r" %speed).encode())
-		time.sleep(waitTime)
+		sp.write(("#2 P600 #8 P1500 T%i\r" %speed).encode())
+		time.sleep((waitTime + .5))
 
 		#lifts up second leg 
 		moveServo(1, 1535, speed, waitTime)
 		moveServo(0, 1950, speed, waitTime)
 		moveServo(1, 2150, speed, waitTime)
 
-		#lifts up third leg 
+		#lifts up third leg and ensures the robot maintains proper balance
+		sp.write(("#0 P1550 #24 P1800 #10 P1690 T750\r").encode())
+		time.sleep(1.75)
 		moveServo(17, 2500, speed, waitTime)
 		moveServo(16, 1000, speed, waitTime)
 		moveServo(17, 1600, speed, waitTime)
+		sp.write(("#0 P1950 #24 P1200 #10 P1500 T%i\r" %speed).encode())
+		time.sleep(waitTime + .5)
 
 		#lifts up forth leg 
-		moveServo(9, 1600, speed, waitTime)
+		moveServo(9, 2350, speed, waitTime)
 		moveServo(8, 1900, speed, waitTime)
-		moveServo(9, 2250, speed, waitTime)
+		moveServo(9, 1460, speed, waitTime)
 
+
+		time.sleep(5)		
+	
 		#moves body forward
 		sp.write(("#0 P1425 #8 P1500 #16 P1500 #24 P1600 #26 P1250 T400\r").encode())
 		time.sleep(waitTime)
@@ -66,9 +79,9 @@ def moveBackward(speed, distance):
 	moveServo(17, 1600, speed, waitTime)
 
 	#lifts up forth leg 
-	moveServo(9, 1600, speed, waitTime)
+	moveServo(9, 2350, speed, waitTime)
 	moveServo(8, 900, speed, waitTime)
-	moveServo(9, 2250, speed, waitTime)
+	moveServo(9, 1460, speed, waitTime)
 
 	#moves body 
 	sp.write(("#0 P1425 #8 P1500 #16 P1500 #24 P1600 #26 P1250 T400\r").encode())
@@ -99,9 +112,9 @@ def turnCounterClockwise(speed, degrees):
 		moveServo(17, 1600, speed, waitTime)
 
 		#lifts up forth leg 
-		moveServo(9, 1600, speed, waitTime)
+		moveServo(9, 2350, speed, waitTime)
 		moveServo(8, 2350, speed, waitTime)
-		moveServo(9, 2250, speed, waitTime)
+		moveServo(9, 1460, speed, waitTime)
 
 		time.sleep(waitTime)
 
@@ -125,9 +138,9 @@ def turnCounterClockwise(speed, degrees):
 		moveServo(17, 1600, speed, waitTime)
 
 		#lifts up forth leg 
-		moveServo(9, 1600, speed, waitTime)
+		moveServo(9, 2350, speed, waitTime)
 		moveServo(8, 1650, speed, waitTime)
-		moveServo(9, 2250, speed, waitTime)
+		moveServo(9, 1460, speed, waitTime)
 
 		time.sleep(waitTime)
 
@@ -139,7 +152,7 @@ def turnCounterClockwise(speed, degrees):
 def defultPosition():
 
 	# set the servos to the inital position
-	sp.write("#0 P1425 #1 P2250 #2 P1625 #8 P1500 #9 P2300 #10 P1500 #16 P1500 #17 P1600 #18 P1475 #24 P1600 #25 P2215 #26 P1450 T.5\r".encode())
+	sp.write("#0 P1425 #1 P2150 #2 P600 #8 P1500 #9 P1460 #10 P1500 #16 P1500 #17 P1600 #18 P1475 #24 P1600 #25 P2215 #26 P1450 T.5\r".encode())
 
 #runs all the modules and gets user input
 while True: 
@@ -180,7 +193,7 @@ while True:
 
 		print "Initiating command\n"
 
-		turn(speedInput, degrees)
+		turnCounterClockwise(speedInput, degrees)
 
 		print "Finished command; restarting and waiting for another input \n" 
 		

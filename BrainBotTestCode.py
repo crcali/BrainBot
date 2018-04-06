@@ -237,7 +237,7 @@ def main():
             raw=re.split(" ", command)
             print(len(raw))
             if len(raw) == 3 and (raw[0] == "forward" or raw[0] == "backward"):
-                if ((int(raw[1]) > 100 and int(raw[1]) < 1000) and \
+                if ((int(raw[1]) > 100 and int(raw[1]) < 2000) and \
                     (int(raw[2]) % 5 == 0)):
                     command=raw[0]
                     speed=raw[1]
@@ -247,7 +247,7 @@ def main():
                 else:
                     print("Incorrect Format: <forward|backward> <self.speed> <distance>")
             elif len(raw) == 3 and (raw[0] == "turn") and \
-                    (int(raw[1]) > 100 and int(raw[1] < 1000)) \
+                    (int(raw[1]) > 100 and int(raw[1] < 2000)) \
                     (int(raw[2]) % 45 == 0):
                     command=raw[0]
                     speed=raw[1]

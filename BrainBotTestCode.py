@@ -245,7 +245,7 @@ def main():
                     activethread=RobotCommands(command, speed, distance)
                     activethread.start()
                 else:
-                    print("Incorrect Format: <forward|backward> <self.speed> <distance>")
+                    print("Incorrect Format: <forward|backward> <speed> <distance>")
             elif len(raw) == 3 and (raw[0] == "turn") and \
                     (int(raw[1]) > 100 and int(raw[1] < 2000)) \
                     (int(raw[2]) % 45 == 0):
@@ -256,7 +256,7 @@ def main():
                     activethread.start()
 
             else:
-                print("Invalid Length, should be: <forward|backward> <self.speed> <distance>")
+                print("Invalid Length, should be: <forward|backward> <speed> <distance>")
 
     print('Exiting main program')
 

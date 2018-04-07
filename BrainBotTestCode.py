@@ -11,7 +11,7 @@ import serial
 sp = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
 
 Directions = '''
-Enter your command in the following format: <forward | backward| turn> <speed (must be between 100 and 2000)> 
+Enter your command in the following format: <forward | backward|turn|stop> <speed (must be between 100 and 2000) (speed is not required if 'stop' is entered)> 
 It will automatically run your entered command after ENTER is pressed
 Enter exit to close serial port and end program
 '''
@@ -43,6 +43,9 @@ class RobotCommands(threading.Thread):
         while not self.shutdown_flag.is_set():
             # ... Job code here ...
             time.sleep(0.5)
+
+            if self.command == "stop":
+                defultPosition()
 
             if self.command == 'forward':
                 #commands to move forward with the parameters
@@ -212,43 +215,29 @@ def main():
             running=False
         else:
             raw=re.split(" ", command)
-            print(len(raw))
-<<<<<<< HEAD
-            print(raw[0])
-            print(raw[1])
-            print(raw[2])
             if len(raw) == 2 and (raw[0] == "forward" or raw[0] == "backward"):
                 if ((int(raw[1]) > 100 and int(raw[1]) < 2000)):
-=======
-            if len(raw) == 3 and (raw[0] == "forward" or raw[0] == "backward"):
-                if ((int(raw[1]) > 100 and int(raw[1]) < 2000) and \
-                    (int(raw[2]) % 5 == 0)):
->>>>>>> 0085116bc5902b16ed50cee276e0ae4e19b423aa
                     command=raw[0]
                     speed=raw[1]
                     activethread=RobotCommands(command, speed)
                     activethread.start()
                 else:
-<<<<<<< HEAD
                     print("Incorrect Format: <forward|backward> <speed>")
-            elif (len(raw) == 3 and (raw[0] == "turn") and \
-                    (int(raw[1]) > 100 and int(raw[1]) < 2000)):
-=======
-                    print("Incorrect Format: <forward|backward> <speed> <distance>")
-            elif len(raw) == 3 and (raw[0] == "turn") and \
-                    (int(raw[1]) > 100 and int(raw[1] < 2000)) \
-                    (int(raw[2]) % 45 == 0):
->>>>>>> 0085116bc5902b16ed50cee276e0ae4e19b423aa
+            elif len(raw) == 2 and (raw[0] == "turn"):
+                if (int(raw[1]) > 100 and int(raw[1]) < 2000):
                     command=raw[0]
                     speed=raw[1]
                     activethread=RobotCommands(command, speed)
                     activethread.start()
+                else:
+                    print("Incorrect Format: <turn> <speed>")
+            elif (len(raw) == 1 and (raw[0] == "stop")):
+                command=raw[0]
+                speed=0
+                activethread=RobotCommands(command, speed)
+                activethread.start()
             else:
-<<<<<<< HEAD
-                print("Invalid Length, should be: <forward|backward> <speed>")
-=======
-                print("Invalid Length, should be: <forward|backward> <speed> <distance>")
->>>>>>> 0085116bc5902b16ed50cee276e0ae4e19b423aa
+                print("Invalid Length, should be: <forward|backward|turn|stop> <speed>")
 
     print('Exiting main program')
 

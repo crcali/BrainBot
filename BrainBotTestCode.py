@@ -213,25 +213,42 @@ def main():
         else:
             raw=re.split(" ", command)
             print(len(raw))
+<<<<<<< HEAD
             print(raw[0])
             print(raw[1])
             print(raw[2])
             if len(raw) == 2 and (raw[0] == "forward" or raw[0] == "backward"):
                 if ((int(raw[1]) > 100 and int(raw[1]) < 2000)):
+=======
+            if len(raw) == 3 and (raw[0] == "forward" or raw[0] == "backward"):
+                if ((int(raw[1]) > 100 and int(raw[1]) < 2000) and \
+                    (int(raw[2]) % 5 == 0)):
+>>>>>>> 0085116bc5902b16ed50cee276e0ae4e19b423aa
                     command=raw[0]
                     speed=raw[1]
                     activethread=RobotCommands(command, speed)
                     activethread.start()
                 else:
+<<<<<<< HEAD
                     print("Incorrect Format: <forward|backward> <speed>")
             elif (len(raw) == 3 and (raw[0] == "turn") and \
                     (int(raw[1]) > 100 and int(raw[1]) < 2000)):
+=======
+                    print("Incorrect Format: <forward|backward> <speed> <distance>")
+            elif len(raw) == 3 and (raw[0] == "turn") and \
+                    (int(raw[1]) > 100 and int(raw[1] < 2000)) \
+                    (int(raw[2]) % 45 == 0):
+>>>>>>> 0085116bc5902b16ed50cee276e0ae4e19b423aa
                     command=raw[0]
                     speed=raw[1]
                     activethread=RobotCommands(command, speed)
                     activethread.start()
             else:
+<<<<<<< HEAD
                 print("Invalid Length, should be: <forward|backward> <speed>")
+=======
+                print("Invalid Length, should be: <forward|backward> <speed> <distance>")
+>>>>>>> 0085116bc5902b16ed50cee276e0ae4e19b423aa
 
     print('Exiting main program')
 

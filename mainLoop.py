@@ -5,14 +5,15 @@ import time
 import threading
 import signal
 import serial
+from BrainBotTestCode import *
 
-# modules for brain
-from IPython.display import HTML
+# modules for brinstaain
+#from IPython.display import HTML
 import numpy as np
 import pandas as pd
 import peakutils as pku
 import functools
-from matplotlib.animation import FuncAnimation
+#from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 from sig_mov import *
 import pickle
@@ -21,10 +22,10 @@ import pickle
 # load and preprocess neural data
 braindata_file = './data/dish_5_experiment_37_100000-110000ms.obj'
 with open(braindata_file,'rb') as f:
-    neurosignal = pickle.load(f)
+    neurosignal = pickle.load(f, encoding='ASCII')
 
 vector_method = functools.partial(np.sum,axis=1)
-neurosignal = neurosignal.sum(axis = 1)
+neurosignal = np.array(neurosignal.sum(axis = 1))
 
 # parameter definition
 LOOP_TIME = 0.5 # seconds
@@ -40,7 +41,7 @@ sp = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
 
 
 # initialize plot
-fig = plt.figure(figsize=(8,4))
+fig = plt.figure(figsize=(16,8))
 # display neural data
 ax1 = fig.add_subplot(211)
 line1, = ax1.plot(np.arange(neural_index_interval), np.ones(neural_index_interval), 'r-') # Returns a tuple of line objects, thus the comma
@@ -50,10 +51,10 @@ plt.ylabel('Neural Firing')
 ax2 = fig.add_subplot(212)
 line2, = ax2.plot(np.arange(neural_index_interval), np.ones(neural_index_interval), 'r-') # Returns a tuple of line objects, thus the comma
 plt.ylabel('Robot Speed')
-plt.ylim((0,300))
+plt.ylim((0,800))
 #plt.show()
 
-have_robot = False
+have_robot = True
 # main loop
 
 # Register the signal handlers
@@ -86,7 +87,8 @@ while running is True:
     movement = signal_movement(curr_brain_signal,speed_rate,neural_index_interval)
     curr_neural_index = curr_neural_index + neural_index_interval
 
-
+    movement = (2000-(100*movement))/5
+    move_time = 10.0
     CMD_direction = 'forward'
     CMD_speed = movement
     # ---------------------------
@@ -111,7 +113,7 @@ while running is True:
             print("No running threads")
 
         # Terminate thread if exit command is received, or reached loop number
-        if command == 'exit' or loop_counter> NUM_LOOPS:
+        if CMD_direction == 'exit' or loop_counter > NUM_LOOPS:
             # Terminate the running threads.
             # Set the shutdown flag on each thread to trigger a clean shutdown of each thread.
             activethread.shutdown_flag.set()
@@ -120,8 +122,10 @@ while running is True:
             running=False
         else:
             # send command
+            print('Sending command')
             activethread=RobotCommands(CMD_direction, CMD_speed)
             activethread.start()
+            time.sleep(move_time)
 
 
 print('Exiting main program')

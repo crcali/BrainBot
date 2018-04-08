@@ -41,13 +41,18 @@ def movement_sequence(raw_data, bins_size, speed_rate, main_vector_method):
     
     return bins_list
 
-def signal_speed(signal, speed_rate,bins_size):
+def signal_movement(signal, speed_rate, bins_size):
     '''
     set the number of the peaks as the indicator of speed
     '''
-    return pku.indexes(signal, speed_rate, bins_size/20)
+    speed = pku.indexes(signal, speed_rate, bins_size/20)
+    if speed%2 == 1:
+        return 'forward {0}'.format(speed*10)
+    else
+        return 'backward {0}'.format(speed*10)
 
 def signal_direction(signal):
+    
     pass
 
 class SignalAnimation(object):

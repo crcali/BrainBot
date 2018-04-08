@@ -3,25 +3,25 @@ from IPython.display import HTML
 import numpy as np
 import pandas as pd
 import peakutils as pku
-import functools 
+import functools
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 def movement_sequence(raw_data, bins_size, speed_rate, main_vector_method):
     '''
     Based on the binsize, divide the 'raw_data' into the individual bins by size 'bins_size', and
-    
+
     Parameters:
-        --raw_data:pandas dataframe(or 2 dimensional nd-array), the row repersents the time point , the column 
+        --raw_data:pandas dataframe(or 2 dimensional nd-array), the row repersents the time point , the column
                     represents the electrodes(channels).
-        
+
         --bins_size(int): the size of individual bin. decides the time interval for each bin.
-        
+
         --speed_rate(float number >0 AND <1 ): change the speed manually and non-linearly, higher it is, faster speed you got
-        
+
         -- main_vector_method: the method to reduce the 64 dimensions to 1 dimension
     Returns:
-        --bins_list: the list of parameters speed and in each bin distance 
-    
+        --bins_list: the list of parameters speed and in each bin distance
+
     '''
     flag = 0
     bins_list = []
@@ -38,21 +38,22 @@ def movement_sequence(raw_data, bins_size, speed_rate, main_vector_method):
 
         bins_list.append(speed_temp)
         flag += bins_size
-    
+
     return bins_list
 
 def signal_movement(signal, speed_rate, bins_size):
     '''
     set the number of the peaks as the indicator of speed
     '''
-    speed = pku.indexes(signal, speed_rate, bins_size/20)
-    if speed%2 == 1:
-        return 'forward {0}'.format(speed*10)
-    else
-        return 'backward {0}'.format(speed*10)
+    speed = len(pku.indexes(signal, speed_rate, bins_size/20))
+    return speed
+    # if speed%2 == 1:
+    #     return 'forward {0}'.format(speed*10)
+    # else:
+    #     return 'backward {0}'.format(speed*10)
 
 def signal_direction(signal):
-    
+
     pass
 
 class SignalAnimation(object):
@@ -63,16 +64,16 @@ class SignalAnimation(object):
 
        --ax(matplotlib.Axes object):
              the position of the graph
-       --signal_array(1-d array): 
+       --signal_array(1-d array):
              signal data
        --title(string):
              the title of the graph
        --kwargs:
             'time_resolution':(unit:s) default: 0.001s. the time resolution using in the recording length
-            'display_time_range':(unit:s) default: [-0.01,0.01], the time range shown in the animation 
+            'display_time_range':(unit:s) default: [-0.01,0.01], the time range shown in the animation
             'xticks':default:[-0.01,0,0.01] the position of the xticks
             'xtick_label':default:['past','now','future'], the label of xticks
-            'display_interval':default:200 determine the refreshing speed of the 
+            'display_interval':default:200 determine the refreshing speed of the
             'fragment': np.arange(0,10)}
 
     ---method----

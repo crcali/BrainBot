@@ -3,7 +3,7 @@ import time
 import threading
 import signal
 import serial
-
+import sig_mov
 #opens the serial port over Bluetooth
 sp = serial.Serial('/dev/ttyACM0', 9600, timeout=0)
 

@@ -5,16 +5,16 @@ import signal
 import serial
 import sig_mov
 #opens the serial port over Bluetooth
-sp = serial.Serial('/dev/ttyACM0', 9600, timeout=0)
+#sp = serial.Serial('/dev/ttyACM0', 9600, timeout=0)
 
 #opens the serial port through a USB-to-Serial cable
-#sp = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
+sp = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
 
-Directions = '''
-Enter your command in the following format: <forward | backward|left|right|stop> <speed (must be between 100 and 2000) (speed is not required if 'stop' is entered)> 
-It will automatically run your entered command after ENTER is pressed
-Enter exit to close serial port and end program
-'''
+# Directions = '''
+# Enter your command in the following format: <forward | backward|left|right|stop> <speed (must be between 100 and 2000) (speed is not required if 'stop' is entered)> 
+# It will automatically run your entered command after ENTER is pressed
+# Enter exit to close serial port and end program
+# '''
 
 class RobotCommands(threading.Thread):
     def __init__(self, INPUT, SPEED):

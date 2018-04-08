@@ -5,10 +5,10 @@ import signal
 import serial
 
 #opens the serial port over Bluetooth
-#sp = serial.Serial('/dev/ttyACM0', 9600, timeout=0)
+sp = serial.Serial('/dev/ttyACM0', 9600, timeout=0)
 
 #opens the serial port through a USB-to-Serial cable
-sp = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
+#sp = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
 
 Directions = '''
 Enter your command in the following format: <forward | backward|left|right|stop> <speed (must be between 100 and 2000) (speed is not required if 'stop' is entered)> 
@@ -35,7 +35,7 @@ class RobotCommands(threading.Thread):
             if not self.shutdown_flag.is_set():
                 sp.write(("#%i P%i T%i\r" %(int(servoNumber), int(position), int(speed))).encode())
                 time.sleep(waitTime)
-        def defultPosition():
+        def defaultPosition():
             # set the servos to the inital position
             sp.write("#0 P1425 #1 P1850 #2 P600 #8 P1500 #9 P1000 #10 P1500 \
                       #16 P1500 #17 P1600 #18 P1475 #24 P1600 #25 P2215 #26 P1450 T.5\r".encode())
@@ -45,14 +45,14 @@ class RobotCommands(threading.Thread):
             time.sleep(0.5)
 
             if self.command == "stop":
-                defultPosition()
+                defaultPosition()
 
             if self.command == 'forward':
                 #commands to move forward with the parameters
                 self.speed = int(self.speed)
                 waitTime = (int(self.speed)/1000)+.25
                 
-                defultPosition()
+                defaultPosition()
                 
                 #lifts up first leg and ensures the robot maintains proper balance
                 if not self.shutdown_flag.is_set(): sp.write(("#2 P500 #8 P1950 T750\r").encode())
@@ -92,7 +92,7 @@ class RobotCommands(threading.Thread):
             if self.command == 'backward':
                 #commands to move backward with the parameters
                 self.speed = int(self.speed)
-                defultPosition()
+                defaultPosition()
                 waitTime = (int(self.speed)/1000)+.35
                 
                 #moves legs to balance robot
@@ -134,7 +134,7 @@ class RobotCommands(threading.Thread):
                 self.speed = int(self.speed)
                 waitTime = (int(self.speed/1000))+.25
 
-                defultPosition()
+                defaultPosition()
             
                 #lifts up first leg to enable second leg to move
                 if not self.shutdown_flag.is_set(): sp.write(("#24 P1540 #18 P1610 #0 P1690 T750\r").encode())
@@ -177,7 +177,7 @@ class RobotCommands(threading.Thread):
                 self.speed = int(self.speed)
                 waitTime = (int(self.speed/1000))+.25
 
-                defultPosition()
+                defaultPosition()
             
                 #lifts up fourth leg to enable second leg to move
                 if not self.shutdown_flag.is_set(): sp.write(("#24 P1540 #18 P1610 #0 P1690 T750\r").encode())

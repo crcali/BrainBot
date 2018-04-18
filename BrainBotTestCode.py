@@ -31,10 +31,10 @@ class RobotCommands(threading.Thread):
     def run(self):
         print('Thread #%s started' % self.ident)
         print("temp = ", self.command)
-        def moveServo(servoNumber, position, speed, waitTime):
+        def moveServo(servoNumber, position):
             if not self.shutdown_flag.is_set():
-                sp.write(("#%i P%i T%i\r" %(int(servoNumber), int(position), int(speed))).encode())
-                time.sleep(waitTime)
+                sp.write(("#%i P%i T15\r" %(int(servoNumber), int(position))).encode())
+                time.sleep(.25)
         def defaultPosition():
             # set the servos to the inital position
             sp.write("#0 P1425 #1 P1850 #2 P600 #8 P1500 #9 P1000 #10 P1500 \
@@ -50,44 +50,50 @@ class RobotCommands(threading.Thread):
             if self.command == 'forward':
                 #commands to move forward with the parameters
                 self.speed = int(self.speed)
-                waitTime = (int(self.speed)/1000)+.25
-                
-                defaultPosition()
+                waitTime = (self.speed/100)-1
+
+                if not self.shutdown_flag.is_set(): defaultPosition()
                 
                 #lifts up first leg and ensures the robot maintains proper balance
-                if not self.shutdown_flag.is_set(): sp.write(("#2 P500 #8 P1950 T750\r").encode())
-                if not self.shutdown_flag.is_set(): time.sleep(1.75)
-                moveServo(25, 1600, self.speed, waitTime)
-                moveServo(24, 1200, self.speed, waitTime)
-                if not self.shutdown_flag.is_set(): sp.write(("#25 P2215 #26 P1450 T%i\r" %self.speed).encode())
-                if not self.shutdown_flag.is_set(): sp.write(("#2 P600 #8 P1500 T%i\r" %self.speed).encode())
-                if not self.shutdown_flag.is_set(): time.sleep((waitTime + 1))
+                if not self.shutdown_flag.is_set(): sp.write(("#2 P500 #8 P1950 T550\r").encode())
+                if not self.shutdown_flag.is_set(): time.sleep(1)
+                moveServo(25, 1800)
+                moveServo(24, 1400)
+                if not self.shutdown_flag.is_set(): sp.write(("#25 P2215 #26 P1450 T250\r").encode())
+                if not self.shutdown_flag.is_set(): sp.write(("#2 P600 #8 P1500 T250\r").encode())
+                if not self.shutdown_flag.is_set(): time.sleep(.75)
+
+                if not self.shutdown_flag.is_set(): time.sleep(waitTime)
 
                 #lifts up second leg 
-                moveServo(1, 1500, self.speed, waitTime)
-                moveServo(0, 1950, self.speed, waitTime)
-                moveServo(1, 1850, self.speed, waitTime)    
+                moveServo(1, 1675)
+                moveServo(0, 1700)
+                moveServo(1, 1850)    
 
-                #lifts up third leg 
-                if not self.shutdown_flag.is_set(): sp.write(("#0 P1550 #24 P1800 #10 P1690 T750\r").encode())
-                if not self.shutdown_flag.is_set(): time.sleep(1.75)
-                moveServo(17, 2500, self.speed, waitTime)
-                moveServo(16, 1000, self.speed, waitTime)
-                moveServo(17, 1600, self.speed, waitTime)
-                if not self.shutdown_flag.is_set(): sp.write(("#0 P1950 #24 P1200 #10 P1500 T%i\r" %self.speed).encode())
-                if not self.shutdown_flag.is_set(): time.sleep(waitTime + .5)
+                if not self.shutdown_flag.is_set(): time.sleep(waitTime)
+
+                #lifts up third leg and ensures the robot maintains proper balance            
+                if not self.shutdown_flag.is_set(): sp.write(("#0 P1550 #24 P1800 #10 P1690 T550\r").encode())
+                if not self.shutdown_flag.is_set(): time.sleep(1)
+                moveServo(17, 1900)
+                moveServo(16, 1150)
+                moveServo(17, 1600)
+                if not self.shutdown_flag.is_set(): sp.write(("#0 P1950 #24 P1200 #10 P1500 T250\r").encode())
+                if not self.shutdown_flag.is_set(): time.sleep(.75)
+                
+                if not self.shutdown_flag.is_set(): time.sleep(waitTime)
 
                 #lifts up forth leg 
-                moveServo(9, 1890, self.speed, waitTime)
-                moveServo(8, 1950, self.speed, waitTime)
-                moveServo(9, 1000, self.speed, waitTime)
+                moveServo(9, 1400)
+                moveServo(8, 1925)
+                moveServo(9, 1000)
 
 
-                if not self.shutdown_flag.is_set(): time.sleep(2)       
+                if not self.shutdown_flag.is_set(): time.sleep(waitTime)       
             
                 #moves body forward
                 if not self.shutdown_flag.is_set(): sp.write(("#0 P1425 #8 P1500 #16 P1500 #24 P1600 #26 P1250 T400\r").encode())
-                if not self.shutdown_flag.is_set(): time.sleep(waitTime)
+                if not self.shutdown_flag.is_set(): time.sleep(.1)
 
             if self.command == 'backward':
                 #commands to move backward with the parameters
@@ -284,13 +290,6 @@ def main():
                 print("Invalid Length, should be: <forward|backward|right|left|stop> <speed>")
 
     print('Exiting main program')
-
-    #close serial port
-    sp.close()
-    isClosed = sp.is_open
-    while isClosed == True:
-        sp.close
-        isClosed = sp.is_open
-
+    
 if __name__ == '__main__':
     main()

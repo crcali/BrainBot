@@ -37,7 +37,7 @@ neural_index_interval = int(LOOP_TIME*FS)
 speed_rate = 0.01
 
 # open serial port
-sp = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
+sp = serial.Serial('/dev/ttyACM0', 11520, timeout=0)
 
 
 # initialize plot

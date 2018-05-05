@@ -15,6 +15,7 @@ import peakutils as pku
 import functools
 #from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
+from matplotlib import gridspec
 from sig_mov import *
 import pickle
 #######
@@ -28,6 +29,7 @@ vector_method = functools.partial(np.sum,axis=1)
 neurosignal = np.array(neurosignal.sum(axis = 1))
 
 # parameter definition
+have_robot = False
 LOOP_TIME = 0.5 # seconds
 RUN_TIME = 30 # seconds
 NUM_LOOPS = RUN_TIME/LOOP_TIME
@@ -42,23 +44,26 @@ sig_max = np.max(neurosignal)
 
 
 # initialize plot
-fig = plt.figure(figsize=(16,8))
+fig = plt.figure(figsize=(16,4))
+gs = gridspec.GridSpec(1, 2, width_ratios=[5, 1])
+
 # display neural data
-ax1 = fig.add_subplot(211)
+ax1 = plt.subplot(gs[0])
 line1, = ax1.plot(np.arange(neural_index_interval), np.ones(neural_index_interval), 'r-') # Returns a tuple of line objects, thus the comma
-plt.ylim((0,np.max(neurosignal)))
+plt.ylim((0,sig_max))
 plt.ylabel('Neural Firing')
+
 # display command
-ax2 = fig.add_subplot(212)
-line2, = ax2.plot(np.arange(neural_index_interval), np.ones(neural_index_interval), 'r-') # Returns a tuple of line objects, thus the comma
+ax2 = plt.subplot(gs[1])
+line2, = ax2.bar(0, 0, width=0.2) # Returns a tuple of line objects, thus the comma
 plt.ylabel('Robot Speed')
-plt.ylim((0,2000))
+plt.xlim([-0.5, 0.5])
+plt.ylim((0,INVERT_SPEED-MIN_SPEED))
 #plt.show()
 
-have_robot = False
-# main loop
 
-# Register the signal handlers
+#### main loop
+# Register the signal handlers if robot is connected
 if have_robot:
     # open serial port
     sp = serial.Serial('/dev/ttyACM0', 11520, timeout=0)
@@ -108,7 +113,7 @@ while running is True:
 
     # VISUALIZATION
     line1.set_ydata(curr_brain_signal)
-    line2.set_ydata(movement)
+    line2.set_height(movement)
     # fig.canvas.draw()
     # fig.canvas.flush_events()
     plt.draw()

@@ -47,12 +47,23 @@ def signal_movement(signal, speed_rate, bins_size):
     '''
     set the number of the peaks as the indicator of speed
     '''
-    speed = len(pku.indexes(signal, speed_rate, bins_size/20))
+    speed = len(pku.indexes((signal, speed_rate, bins_size/20)))
     return speed
     # if speed%2 == 1:
     #     return 'forward {0}'.format(speed*10)
     # else:
     #     return 'backward {0}'.format(speed*10)
+
+def fr_to_speed(signal, sig_max, sig_min=0., transform='linear'):
+    # compute max of the current chunk of signal and returns a float between
+    # 0 to 1, scaled to the absolute maximum with linear or sigmoidal transform
+    cur_max = np.max(signal)
+
+    if transform is 'linear':
+        speed = max(0,cur_max-sig_min)/(sig_max-sig_min)
+    #elif transform is 'sigmoid':
+        # to be implemented
+    return speed
 
 def signal_direction(signal):
 

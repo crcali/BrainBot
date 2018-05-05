@@ -3,6 +3,7 @@ matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import time
+import pickle
 
 
 class RealTimeSigAni(object):
@@ -95,6 +96,7 @@ class RealTimeSigAni(object):
                 self.ax.draw_artist(line)
         self.signal_curve.set_ydata((self.signal_array[-self.window_range[1]:])[::-1])
         self.ax.draw_artist(self.signal_curve)
+
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1)
 plt.ion()
@@ -105,6 +107,14 @@ test=RealTimeSigAni(ax,time_resolution,index_interval)
 fig.canvas.draw()
 fig.show()
 number = np.random.randn(100)
+
+# # test with real data
+# braindata_file = './data/dish_5_experiment_37_100000-110000ms.obj'
+# with open(braindata_file,'rb') as f:
+#     neurosignal = pickle.load(f, encoding='ASCII')
+#
+# number = np.array(neurosignal.sum(axis = 1))
+
 for i in number:
     test(i)
     fig.canvas.flush_events()

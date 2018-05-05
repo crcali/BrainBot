@@ -35,9 +35,10 @@ NUM_LOOPS = RUN_TIME/LOOP_TIME
 FS = 1000.
 neural_index_interval = int(LOOP_TIME*FS)
 speed_rate = 0.01
-
-# open serial port
-sp = serial.Serial('/dev/ttyACM0', 11520, timeout=0)
+MAX_SPEED = 2000
+MIN_SPEED = 200
+INVERT_SPEED = 2200
+sig_max = np.max(neurosignal)
 
 
 # initialize plot
@@ -59,6 +60,8 @@ have_robot = True
 
 # Register the signal handlers
 if have_robot:
+    # open serial port
+    sp = serial.Serial('/dev/ttyACM0', 11520, timeout=0)
     signal.signal(signal.SIGTERM, service_shutdown)
     signal.signal(signal.SIGINT, service_shutdown)
 
@@ -84,10 +87,18 @@ while running is True:
 
     ## inside loop
     curr_brain_signal = neurosignal[curr_neural_index:curr_neural_index+neural_index_interval]
-    movement = signal_movement(curr_brain_signal,speed_rate,neural_index_interval)
     curr_neural_index = curr_neural_index + neural_index_interval
 
-    movement = (2000-(100*movement))/5
+    ### old transform
+    # movement = signal_movement(curr_brain_signal,speed_rate,neural_index_interval)
+    # movement = (2000-(100*movement))/5
+
+    # May 4 update
+    # fr_to_speed returns a float between 0 to 1, scaled to absolute max
+    movement = fr_to_speed(curr_brain_signal, sig_max)
+    # need to invert speed because small number is faster
+    movement = INVERT_SPEED - (movement*(MAX_SPEED-MIN_SPEED)+MIN_SPEED)
+
     move_time = 10.0
     CMD_direction = 'forward'
     CMD_speed = movement

@@ -36,7 +36,7 @@ FS = 1000.
 neural_index_interval = int(LOOP_TIME*FS)
 speed_rate = 0.01
 MAX_SPEED = 2000
-MIN_SPEED = 200
+MIN_SPEED = 800
 INVERT_SPEED = 2200
 sig_max = np.max(neurosignal)
 
@@ -52,10 +52,10 @@ plt.ylabel('Neural Firing')
 ax2 = fig.add_subplot(212)
 line2, = ax2.plot(np.arange(neural_index_interval), np.ones(neural_index_interval), 'r-') # Returns a tuple of line objects, thus the comma
 plt.ylabel('Robot Speed')
-plt.ylim((0,800))
+plt.ylim((0,2000))
 #plt.show()
 
-have_robot = True
+have_robot = False
 # main loop
 
 # Register the signal handlers

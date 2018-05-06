@@ -172,14 +172,13 @@ def Output(ser, slow_ratio, time_resolution, index_interval, ymax):
 
 if __name__ == '__main__':
     try:
-
-        neural_data = pd.read_csv('dish_11_experiment_41.csv')
+        with open('../data/dish_5_experiment_37_100000-110000ms.obj','rb') as f:
+            neural_data = pickle.load(f)
         neural_data = neural_data.as_matrix()
-
         time_resolution = 0.001
         index_interval = 100 # The datapoints in each chunk
         slow_ratio = 20  # the times that we animate our signals
-        recording_start = 1000  # the correspondent time points that we choose to animate our dataset
+        recording_start = 0  # the correspondent time points that we choose to animate our dataset
         ymax = 700  # the max of the yaxis inploting
         ser_in = serial.Serial('/dev/pts/22', write_timeout=100)  # these two is the virtual series
         ser_out = serial.Serial('/dev/pts/23', baudrate=19200)

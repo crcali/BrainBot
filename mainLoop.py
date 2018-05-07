@@ -29,7 +29,7 @@ vector_method = functools.partial(np.sum,axis=1)
 neurosignal = np.array(neurosignal.sum(axis = 1))
 
 # parameter definition
-have_robot = False
+have_robot = True
 LOOP_TIME = 0.5 # seconds
 RUN_TIME = 30 # seconds
 NUM_LOOPS = RUN_TIME/LOOP_TIME
@@ -67,8 +67,8 @@ plt.ylim((0,INVERT_SPEED-MIN_SPEED))
 if have_robot:
     # open serial port
     sp = serial.Serial('/dev/ttyACM0', 11520, timeout=0)
-    signal.signal(signal.SIGTERM, service_shutdown)
-    signal.signal(signal.SIGINT, service_shutdown)
+    #signal.signal(signal.SIGTERM, service_shutdown)
+    #signal.signal(signal.SIGINT, service_shutdown)
 
 print('Starting the Main Program')
 

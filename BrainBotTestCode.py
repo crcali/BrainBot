@@ -5,7 +5,7 @@ import signal
 import serial
 import sig_mov
 #opens the serial port over Bluetooth
-#sp = serial.Serial('/dev/ttyACM0', 11520, timeout=0)
+sp = serial.Serial('/dev/ttyACM0', 11520, timeout=0)
 
 #opens the serial port through a USB-to-Serial cable
 #sp = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
@@ -50,7 +50,7 @@ class RobotCommands(threading.Thread):
             if self.command == 'forward':
                 #commands to move forward with the parameters
                 self.speed = int(self.speed)
-                waitTime = (self.speed/100)-1
+                waitTime = (self.speed/900)
 
                 if not self.shutdown_flag.is_set(): defaultPosition()
 

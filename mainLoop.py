@@ -5,7 +5,7 @@ import time
 import threading
 import signal
 import serial
-from BrainBotTestCode import *
+from RobotCode.finalRobotCode import *
 
 # modules for brinstaain
 #from IPython.display import HTML
@@ -16,7 +16,7 @@ import functools
 #from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
-from sig_mov import *
+from peakutils.sig_mov import *
 import pickle
 #######
 
@@ -37,8 +37,8 @@ NUM_LOOPS = RUN_TIME/LOOP_TIME
 FS = 1000.
 neural_index_interval = int(LOOP_TIME*FS)
 speed_rate = 0.01
-MAX_SPEED = 2000
-MIN_SPEED = 800
+MAX_SPEED = 1500
+MIN_SPEED = 300
 INVERT_SPEED = 2200
 sig_max = np.max(neurosignal)
 

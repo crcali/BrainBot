@@ -1,99 +1,4 @@
 //====================================================================
-//Project Lynxmotion Phoenix
-//Description: Phoenix, control file.
-//The control input subroutine for the phoenix software is placed in this file.
-//Can be used with V2.0 and above
-//Configuration version: V1.0
-//Date: 25-10-2009
-//Programmer: Jeroen Janssen (aka Xan)
-//             Kurt Eckhardt (aka KurtE) - converted to c ported to Arduino...
-//
-//Hardware setup: Serial version - This contoll input, uses the same format of input as the old Powerpod serial test program.  
-// Obviously it can be hacked up to almost any format
-// 
-//NEW IN V1.1
-//	- added speaker constant
-//	- added variable for number of gaits in code
-//	- Changed BodyRot to 1 decimal percision
-//	- Added variable Center Point of Rotation for the body
-//
-//	Walk method 1:
-//	- Left Stick	Walk/Strafe
-//	- Right Stick	Rotate
-//
-//	Walk method 2:
-//	- Left Stick	Disable
-//	- Right Stick	Walk/Rotate
-//
-//
-//
-// Packet format:
-// DualShock(0) : Checksum of other byte
-// DualShock(1) 
-//   bit7 - Left Button test
-//   bit6 - Down Button test
-//   bit5 - Right Button test
-//   bit4 - Up Button test
-//   bit3 - Start Button test
-//   bit2 - R3 Button test (Horn)
-//   bit1 - L3 Button test
-//   bit0 - Select Button test
-// DualShock(2)
-//	bit7 - Square Button test
-//	bit6 - Cross Button test
-//	bit5 - Circle Button test
-//	bit4 - Triangle Button test
-//	bit3 - R1 Button test
-//	bit2 - L1 Button test
-//	bit1 - R2 Button test
-//	bit0 - L2 Button test
-// DualShock(3) - Right stick Left/right
-// DualShock(4) - Right Stick Up/Down
-// DualShock(5) - Left Stick Left/right
-// DualShock(6) - Left Stick Up/Down
-// Note: The actual usages are from PS2 control
-//PS2 CONTROLS:
-//	[Common Controls]
-//	- Start			Turn on/off the bot
-//	- L1			Toggle Shift mode
-//	- L2			Toggle Rotate mode
-//	- Circle		Toggle Single leg mode
-//   - Square        Toggle Balance mode
-//	- Triangle		Move body to 35 mm from the ground (walk pos) 
-//					and back to the ground
-//	- D-Pad up		Body up 10 mm
-//	- D-Pad down	Body down 10 mm
-//	- D-Pad left	decrease speed with 50mS
-//	- D-Pad right	increase speed with 50mS
-//
-//	[Walk Controls]
-//	- select		Switch gaits
-//	- Left Stick	(Walk mode 1) Walk/Strafe
-//				 	(Walk mode 2) Disable
-//	- Right Stick	(Walk mode 1) Rotate, 		
-//					(Walk mode 2) Walk/Rotate
-//	- R1			Toggle Double gait travel speed
-//	- R2			Toggle Double gait travel length
-//
-//	[Shift Controls]
-//	- Left Stick	Shift body X/Z
-//	- Right Stick	Shift body Y and rotate body Y
-//
-//	[Rotate Controls]
-//	- Left Stick	Rotate body X/Z
-//	- Right Stick	Rotate body Y	
-//
-//	[Single leg Controls]
-//	- select		Switch legs
-//	- Left Stick	Move Leg X/Z (relative)
-//	- Right Stick	Move Leg Y (absolute)
-//	- R2			Hold/release leg position
-//
-//	[GP Player Controls]
-//	- select		Switch Sequences
-//	- R2			Start Sequence
-//
-//====================================================================
 // [Include files]
 #if ARDUINO>99
 #include <Arduino.h> // Arduino 1.0
@@ -173,11 +78,6 @@ int j = 255;
 // some external or forward function references.
 extern void SerTurnRobotOff(void);
 
-//==============================================================================
-// This is The function that is called by the Main program to initialize
-//the input controller, which in this case is the PS2 controller
-//process any commands.
-//==============================================================================
 // If both PS2 and XBee are defined then we will become secondary to the xbee
 void InputController::Init(void)
 {
@@ -213,13 +113,13 @@ void InputController::AllowControllerInterrupts(boolean fAllow)
 
 #define ButtonPressed(wMask) (((wButtons & wMask) == 0) && ((g_wButtonsPrev & wMask) != 0))
 
-//==============================================================================
-// This is The main code to input function to read inputs from the PS2 and then
+//=====================================================================================
+// This is The main code to input function to read inputs from the Serial port and then
 //process any commands.
-//==============================================================================
+//=====================================================================================
 void InputController::ControlInput(void)
 {
-  byte abDualShock[7];  // we will to receive 7 bytes of data with the first byte being the checksum
+  byte abDualShock[7];  
   unsigned long ulLastChar;
   boolean fAdjustLegPositions = false;
   word wButtons;
@@ -231,7 +131,7 @@ void InputController::ControlInput(void)
   // In an analog mode so should be OK...
   g_wSerialErrorCnt = 0;    // clear out error count...
 
-  if (input == 's' || input == 'S') {// OK lets try "0" button for Start. 
+  if (input == 's' || input == 'S') {
     if (g_InControlState.fRobotOn) {
       SerSerial.print("Off.");
       SerTurnRobotOff();
@@ -244,7 +144,14 @@ void InputController::ControlInput(void)
     }
   }
 
-  
+  //Set to defult positions
+  if (input == 'q' || input == 'Q') {
+    SerSerial.print("Reset positions.");
+    g_InControlState.TravelLength.z = (0);
+    g_InControlState.TravelLength.x = (0);
+    g_InControlState.TravelLength.y = (0);
+    fAdjustLegPositions = true;
+  }
 
   // Increase speed
   if  (input == 'u' || input == 'U') {
@@ -255,14 +162,14 @@ void InputController::ControlInput(void)
       }
     }
 
-    //Decrease speed
-    if (input == 'n' || input == 'N') {
-      if (g_InControlState.SpeedControl<2000 ) {
-        g_InControlState.SpeedControl = g_InControlState.SpeedControl + 50;
-        MSound( 1, 50, 2000); 
-        SerSerial.print("Decreased speed.");
-      }
+  //Decrease speed
+  if (input == 'n' || input == 'N') {
+    if (g_InControlState.SpeedControl<2000 ) {
+      g_InControlState.SpeedControl = g_InControlState.SpeedControl + 50;
+      MSound( 1, 50, 2000); 
+      SerSerial.print("Decreased speed.");
     }
+  }
 
   // Raise robot
   if (input == 'h' || input == 'H') {
@@ -279,37 +186,46 @@ void InputController::ControlInput(void)
   if (input == 'd' || input == 'D') {
     g_BodyYOffset -= 10;
     SerSerial.print("Height down.");
-
-      // And see if the legs should adjust...
-      fAdjustLegPositions = true;
-      if (g_BodyYOffset > MAX_BODY_Y)
-        g_BodyYOffset = MAX_BODY_Y;
+    // And see if the legs should adjust...
+    fAdjustLegPositions = true;
+    if (g_BodyYOffset > MAX_BODY_Y)
+      g_BodyYOffset = MAX_BODY_Y;
   }
   
   //Circle
   if (input == 'c' || input == 'C') { // R3 Button Test
+    SerSerial.print("Moving in a circle.");
     MSound(1, 50, 2000); 
     SerSerial.print(WalkMethod);
-    SerSerial.print("Moving diagonal");
     g_InControlState.TravelLength.z = (255 - 128);
     g_InControlState.TravelLength.x = -1*(255 - 128);
-
-    k=k-50;
-
     if (!DoubleTravelOn) {  //(Double travel length)
       g_InControlState.TravelLength.x = g_InControlState.TravelLength.x/2;
       g_InControlState.TravelLength.z = g_InControlState.TravelLength.z/2;
     } 
-
-
     g_InControlState.TravelLength.y = -(k - 128)/4; //Right Stick Left/Right 
   }
 
-
   //Double Travel Length
   if (input == 'o' || input == 'O') {// R2 Button Test
+    SerSerial.print("DoubleTravelLength.");
     MSound(1, 50, 2000); 
     DoubleTravelOn = !DoubleTravelOn;
+  }
+
+  //Double leg lift height
+  if (input == 'M' || input == 'm') { // R1 Button Test
+    SerSerial.print("DoubleLegHeight");
+    MSound( 1, 50, 2000); 
+    DoubleHeightOn = !DoubleHeightOn;
+    if (DoubleHeightOn) {
+      SerSerial.print("LegLiftHeight Increased");
+      g_InControlState.LegLiftHeight = 80;
+    }
+    else {
+      SerSerial.print("LegLiftHeight Increased");
+      g_InControlState.LegLiftHeight = 50;
+    }
   }
 
   //Move diagonal 
@@ -318,8 +234,6 @@ void InputController::ControlInput(void)
     SerSerial.print("Moving diagonal");
     g_InControlState.TravelLength.z = (255 - 128);
     g_InControlState.TravelLength.x = (255 - 128);
-
-    k=k-50;
 
     if (!DoubleTravelOn) {  //(Double travel length)
       g_InControlState.TravelLength.x = g_InControlState.TravelLength.x/2;
@@ -333,21 +247,35 @@ void InputController::ControlInput(void)
   //Move straight
   if (input == 'f' || input == 'F') {
     SerSerial.print("Moving forward");
-    g_InControlState.TravelLength.z = (256-128); 
+    g_InControlState.TravelLength.z = (255-128); 
   }
 
   //Move backward
   if (input == 'b' || input == 'B') {
     SerSerial.print("Moving backward");
-    g_InControlState.TravelLength.z = (-1*(256-128));   
+    g_InControlState.TravelLength.z = (-1*(255-128));   
   } 
+
+  //Move left
+  if (input == 'L' || input == 'l') {
+    SerSerial.print("Moving Left");
+    g_InControlState.TravelLength.x = (225-128); 
+  }
+
+  //Rotate in place
+  if (input == 'p' || input == 'P') {
+    SerSerial.print("Rotating in place.");
+    g_InControlState.TravelLength.y = (128)/4;
+  }
 
   //Switch gates
   if (input == 'g' || input == 'G') {
-  g_InControlState.GaitType = g_InControlState.GaitType+1; 
+    g_InControlState.GaitType = g_InControlState.GaitType+1; 
     if (g_InControlState.GaitType<NUM_GAITS) {                 // Make sure we did not exceed number of gaits...
       MSound( 1, 50, 2000); 
+      SerSerial.print("Gait:");
       SerSerial.print(g_InControlState.GaitType);
+      SerSerial.print(".");
     } 
     else {
       MSound(2, 50, 2000, 50, 2250); 
@@ -356,34 +284,30 @@ void InputController::ControlInput(void)
     GaitSelect();
   }
 
- //[Translate functions]
-    g_BodyYShift = 0;
-    if (input == 't' || input == 'T') {
-      g_InControlState.BodyPos.x = (255 - 128)/2;
-      g_InControlState.BodyPos.z = -(255 - 128)/3;
-      g_InControlState.BodyRot1.y = (255 - 128)*2;
-      g_BodyYShift = (-(255 - 128)/2);
-      
-      g_InControlState.BodyPos.x = ( 255 )/2;
-      g_InControlState.BodyPos.z = -( 255 )/3;
-      g_InControlState.BodyRot1.y = ( 255 )*2;
-      g_BodyYShift = (-( 255 )/2);
+  //Translate mode
+  if (input == 't' || input == 'T') {
+    SerSerial.print("Translate Mode.")
+    g_InControlState.BodyPos.x = (255 - 128)/2;
+    g_InControlState.BodyPos.z = -(255 - 128)/3;
+    g_InControlState.BodyRot1.y = (255 - 128)*2;
+    g_BodyYShift = (-(255 - 128)/2);
+    
+    g_InControlState.BodyPos.x = ( 255 )/2;
+    g_InControlState.BodyPos.z = -( 255 )/3;
+    g_InControlState.BodyRot1.y = ( 255 )*2;
+    g_BodyYShift = (-( 255 )/2);
 
 
     }
 
-
-    //[Rotate functions]
-    if (input == 'r' || input == 'R') {
-      SerSerial.print("Rotate Mode");
-      g_InControlState.BodyRot1.x = (255 - 128);
-      g_InControlState.BodyRot1.y = (255 - 128)*2;
-      g_InControlState.BodyRot1.z = (255 - 128);
-      g_BodyYShift = (-(255 - 128)/2);
-    }
-
-
-
+  //Rotate mode
+  if (input == 'r' || input == 'R') {
+    SerSerial.print("Rotate Mode.");
+    g_InControlState.BodyRot1.x = (255 - 128);
+    g_InControlState.BodyRot1.y = (255 - 128)*2;
+    g_InControlState.BodyRot1.z = (255 - 128);
+    g_BodyYShift = (-(255 - 128)/2);
+  }
 
   if (run) {
 

@@ -1,10 +1,6 @@
 //====================================================================
 // [Include files]
-#if ARDUINO>99
 #include <Arduino.h> // Arduino 1.0
-#else
-#include <Wprogram.h> // Arduino 0022
-#endif
 
 //[CONSTANTS]
 // Default to Serial but allow to be defined to something else
@@ -31,14 +27,14 @@
 #define SERB_L3          0x200    //   bit1 - L3 Button test
 #define SERB_SELECT      0x100    //   bit0 - Select Button test
 // DualShock(2)
-#define SERB_SQUARE      0x80    //	bit7 - Square Button test
-#define SERB_CROSS       0x40    //	bit6 - Cross Button test
-#define SERB_CIRCLE      0x20    //	bit5 - Circle Button test
-#define SERB_TRIANGLE    0x10    //	bit4 - Triangle Button test
-#define SERB_R1          0x8    //	bit3 - R1 Button test
-#define SERB_L1          0x4    //	bit2 - L1 Button test
-#define SERB_R2          0x2    //	bit1 - R2 Button test
-#define SERB_L2          0x1    //	bit0 - L2 Button test
+#define SERB_SQUARE      0x80    // bit7 - Square Button test
+#define SERB_CROSS       0x40    // bit6 - Cross Button test
+#define SERB_CIRCLE      0x20    // bit5 - Circle Button test
+#define SERB_TRIANGLE    0x10    // bit4 - Triangle Button test
+#define SERB_R1          0x8    //  bit3 - R1 Button test
+#define SERB_L1          0x4    //  bit2 - L1 Button test
+#define SERB_R2          0x2    //  bit1 - R2 Button test
+#define SERB_L2          0x1    //  bit0 - L2 Button test
 
 #define  SER_RX          3             // DualShock(3) - Right stick Left/right
 #define  SER_RY          4            // DualShock(4) - Right Stick Up/Down
@@ -74,6 +70,10 @@ short              g_sGPSMController;    // What GPSM value have we calculated. 
 bool run = false;
 int k = 255;
 int j = 255;
+
+int this_pin = 7;//pin number of Arduino that is connected with SIG pin of Ultrasonic Ranger.
+long duration;// the Pulse time received;
+int distance;
 
 // some external or forward function references.
 extern void SerTurnRobotOff(void);
@@ -128,8 +128,37 @@ void InputController::ControlInput(void)
 
   input = SerSerial.read();
 
+  double RangeInInches;
+  double RangeInCentimeters;
+  pinMode(this_pin, OUTPUT);
+  digitalWrite(this_pin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(this_pin, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(this_pin,LOW);
+  pinMode(this_pin,INPUT);
+  distance = pulseIn(this_pin,HIGH);
+  RangeInInches = (distance/29.0/2.0);//convert the time to inches;
+  RangeInCentimeters = (distance/74.0/2.0);//convert the time to centimeters
+
   // In an analog mode so should be OK...
   g_wSerialErrorCnt = 0;    // clear out error count...
+
+  if (RangeInInches <= 51) {
+    SerSerial.print("The distance to obstacles in front is: ");
+    SerSerial.print(RangeInInches);//0~157 inches
+    SerSerial.print(" cm");
+    if (RangeInInches <= 25) {
+      if (g_InControlState.fRobotOn) {
+        SerSerial.print("Turned off because robot was close to wall.");
+        g_InControlState.TravelLength.z = (0);
+        g_InControlState.TravelLength.x = (0);
+        g_InControlState.TravelLength.y = (0);
+        fAdjustLegPositions = true;
+        MSound(3, 100, 2500, 80, 2250, 60, 2000);
+      }
+    }
+  }
 
   if (input == 's' || input == 'S') {
     if (g_InControlState.fRobotOn) {
@@ -286,7 +315,7 @@ void InputController::ControlInput(void)
 
   //Translate mode
   if (input == 't' || input == 'T') {
-    SerSerial.print("Translate Mode.")
+    SerSerial.print("Translate Mode.");
     g_InControlState.BodyPos.x = (255 - 128)/2;
     g_InControlState.BodyPos.z = -(255 - 128)/3;
     g_InControlState.BodyRot1.y = (255 - 128)*2;
@@ -545,9 +574,3 @@ void SerTurnRobotOff(void)
   g_InControlState.fRobotOn = 0;
   AdjustLegPositionsToBodyHeight();    // Put main workings into main program file
 }
-
-
-
-
-
-

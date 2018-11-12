@@ -199,7 +199,49 @@ void InputController::ControlInput(void)
       SerSerial.print("Decreased speed.");
     }
   }
-
+  
+  //Each Speed Levels (0 is fastest, 9 is slowest)
+  if (input == '0') {
+    g_InControlState.SpeedControl = 0;
+    MSound( 1, 50, 2000);
+  }
+  if (input == '1') {
+    g_InControlState.SpeedControl = 100;
+    MSound( 1, 50, 2000);
+  }
+  if (input == '2')
+    g_InControlState.SpeedControl = 200;
+    MSound( 1, 50, 2000);
+  }
+  if (input == '3') {
+    g_InControlState.SpeedControl = 300;
+    MSound( 1, 50, 2000);
+  }  
+  if (input == '4') {
+    g_InControlState.SpeedControl = 400;
+    MSound( 1, 50, 2000);
+  }  
+  if (input == '5') {
+    g_InControlState.SpeedControl = 500;
+    MSound( 1, 50, 2000);
+  }
+  if (input == '6') {
+    g_InControlState.SpeedControl = 600;
+    MSound( 1, 50, 2000);
+  }
+  if (input == '7') {
+    g_InControlState.SpeedControl = 700;
+    MSound( 1, 50, 2000);
+  }
+  if (input == '8') {
+    g_InControlState.SpeedControl = 800;
+    MSound( 1, 50, 2000);
+  }
+  if (input == '9') {
+    g_InControlState.SpeedControl = 900;
+    MSound( 1, 50, 2000);
+  }
+  
   // Raise robot
   if (input == 'h' || input == 'H') {
     g_BodyYOffset += 10;

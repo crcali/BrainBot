@@ -37,8 +37,8 @@ NUM_LOOPS = RUN_TIME/LOOP_TIME
 FS = 1000.
 neural_index_interval = int(LOOP_TIME*FS)
 speed_rate = 0.01
-MAX_SPEED = 1500
-MIN_SPEED = 300
+MAX_SPEED = 900
+MIN_SPEED = 0
 INVERT_SPEED = 2200
 sig_max = np.max(neurosignal)
 

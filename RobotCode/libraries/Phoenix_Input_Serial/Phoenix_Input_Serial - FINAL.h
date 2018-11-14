@@ -145,12 +145,11 @@ void InputController::ControlInput(void)
   g_wSerialErrorCnt = 0;    // clear out error count...
 
   if (RangeInInches <= 51) {
-    SerSerial.print("The distance to obstacles in front is: ");
+    SerSerial.print("     ");
     SerSerial.print(RangeInInches);//0~157 inches
     SerSerial.print(" cm");
     if (RangeInInches <= 25) {
       if (g_InControlState.fRobotOn) {
-        SerSerial.print("Turned off because robot was close to wall.");
         g_InControlState.TravelLength.z = (0);
         g_InControlState.TravelLength.x = (0);
         g_InControlState.TravelLength.y = (0);
@@ -171,6 +170,19 @@ void InputController::ControlInput(void)
       g_InControlState.fRobotOn = 1;
       fAdjustLegPositions = true;
     }
+  }
+
+  //defult start from mainLoop.py
+  if (input == 'y') {
+    g_InControlState.fRobotOn = 1;
+    fAdjustLegPositions = true;
+    g_BodyYOffset = 60;
+
+      // And see if the legs should adjust...
+      fAdjustLegPositions = true;
+      if (g_BodyYOffset > MAX_BODY_Y)
+        g_BodyYOffset = MAX_BODY_Y;
+
   }
 
   //Set to defult positions
@@ -200,47 +212,27 @@ void InputController::ControlInput(void)
     }
   }
   
-  //Each Speed Levels (0 is fastest, 9 is slowest)
-  if (input == '0') {
+  //Each Speed Levels (1 and 2 are fastest, 5 is slowest)
+  if (input == '1') {
     g_InControlState.SpeedControl = 0;
     MSound( 1, 50, 2000);
   }
-  if (input == '1') {
-    g_InControlState.SpeedControl = 100;
-    MSound( 1, 50, 2000);
-  }
-  if (input == '2')
-    g_InControlState.SpeedControl = 200;
+  if (input == '2') {
+    g_InControlState.SpeedControl = 0;
     MSound( 1, 50, 2000);
   }
   if (input == '3') {
-    g_InControlState.SpeedControl = 300;
+    g_InControlState.SpeedControl = 50;
     MSound( 1, 50, 2000);
-  }  
+  }
   if (input == '4') {
-    g_InControlState.SpeedControl = 400;
+    g_InControlState.SpeedControl = 200;
     MSound( 1, 50, 2000);
   }  
   if (input == '5') {
-    g_InControlState.SpeedControl = 500;
+    g_InControlState.SpeedControl = 300;
     MSound( 1, 50, 2000);
-  }
-  if (input == '6') {
-    g_InControlState.SpeedControl = 600;
-    MSound( 1, 50, 2000);
-  }
-  if (input == '7') {
-    g_InControlState.SpeedControl = 700;
-    MSound( 1, 50, 2000);
-  }
-  if (input == '8') {
-    g_InControlState.SpeedControl = 800;
-    MSound( 1, 50, 2000);
-  }
-  if (input == '9') {
-    g_InControlState.SpeedControl = 900;
-    MSound( 1, 50, 2000);
-  }
+  }  
   
   // Raise robot
   if (input == 'h' || input == 'H') {
@@ -317,7 +309,7 @@ void InputController::ControlInput(void)
 
   //Move straight
   if (input == 'f' || input == 'F') {
-    SerSerial.print("Moving forward");
+    SerSerial.print(" Moving forward");
     g_InControlState.TravelLength.z = (255-128); 
   }
 

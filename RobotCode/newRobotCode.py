@@ -5,7 +5,7 @@ import signal
 import serial
 import peakutils.sig_mov
 #opens the serial port over Bluetooth
-sp = serial.Serial('/dev/ttyACM0', 11520, timeout=0)
+sp = serial.Serial('/dev/cu.usbmodem14401', 38400, timeout=0)
 
 #opens the serial port through a USB-to-Serial cable
 #sp = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
@@ -21,44 +21,52 @@ class RobotCommands(threading.Thread):
         threading.Thread.__init__(self)
         self.command = INPUT
         self.speed = SPEED
-        self.calcSpeed = SPEED // 100
+        self.calcSpeed = SPEED // 500
+        int(self.calcSpeed)
 
         # The shutdown_flag is a threading.Event object that
         # indicates whether the thread should be terminated.
         self.shutdown_flag = threading.Event()
 
         # ... Other thread setup code here ...
-
-        sp.write("s")
-        sp.write("hhhhhh")
-
+        sp.write(str.encode('yyy'))
     def run(self):
         print('Thread #%s started' % self.ident)
         print("temp = ", self.command)
         def defaultPosition():
             # set the servos to the neutral position
-            sp.write("q")
+            sp.write(str.encode('q'))
 
-        while not self.shutdown_flag.is_set():
-            # ... Job code here ...
+        if self.command == 'stop':
+            if not self.shutdown_flag.is_set(): sp.write(str.encode('s'))
 
-            if self.command == 'stop':
-                if not self.shutdown_flag.is_set(): sp.write("s")
+        if self.command == 'forward':
+        #commands to move forward with the parameters
+            if not self.shutdown_flag.is_set(): sp.write(str.encode('f'))
+            if not self.shutdown_flag.is_set(): sp.write(str.encode('%i' % self.calcSpeed))
 
-            if self.command == 'forward':
-            #commands to move forward with the parameters
-                if not self.shutdown_flag.is_set(): sp.write("f")
-                if not self.shutdown_flag.is_set(): sp.write("%i" % self.calcSpeed)
+            read1 = sp.read()
+            while (self.shutdown_flag.is_set() == False):
+                if sp.read() != read1:
+                    f = open("Ultrasonic_Values.txt","w+")
+                    tdata = sp.read()           
+                    time.sleep(1)              
+                    data_left = sp.inWaiting()  # Get the number of characters ready to be read
+                    tdata += sp.read(data_left) # Do the read and combine it with the first character
+                    print(tdata)
+                    f.write("%s" %tdata)
+                    f.close()    
 
-            if self.command == 'left':
-            #commands to move left with the parameters
-                if not self.shutdown_flag.is_set(): sp.write("l")
-                if not self.shutdown_flag.is_set(): sp.write("%i" % self.calcSpeed)
-           
-            if self.command == 'backward':
-            #commands to move backward with the parameters
-                if not self.shutdown_flag.is_set(): sp.write("b")
-                if not self.shutdown_flag.is_set(): sp.write("%i" % self.calcSpeed)
+
+        if self.command == 'left':
+        #commands to move left with the parameters
+            if not self.shutdown_flag.is_set(): sp.write(str.encode('l'))
+            if not self.shutdown_flag.is_set(): sp.write(str.encode('%i' % self.calcSpeed))
+       
+        if self.command == 'backward':
+        #commands to move backward with the parameters
+            if not self.shutdown_flag.is_set(): sp.write(str.encode('b'))
+            if not self.shutdown_flag.is_set(): sp.write(str.encode('%i' % self.calcSpeed))
 
         # ... Clean shutdown code here ...
         print('Thread #%s stopped' % self.ident)

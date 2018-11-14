@@ -66,7 +66,8 @@ plt.ylim((0,INVERT_SPEED-MIN_SPEED))
 # Register the signal handlers if robot is connected
 if have_robot:
     # open serial port
-    sp = serial.Serial('/dev/ttyACM0', 11520, timeout=0)
+    sp = serial.Serial('/dev/cu.usbmodem14401', 38400, timeout=0)
+
     #signal.signal(signal.SIGTERM, service_shutdown)
     #signal.signal(signal.SIGINT, service_shutdown)
 
@@ -104,7 +105,7 @@ while running is True:
     # need to invert speed because small number is faster
     movement = INVERT_SPEED - (movement*(MAX_SPEED-MIN_SPEED)+MIN_SPEED)
 
-    move_time = 10.0
+    move_time = 5.0
     CMD_direction = 'forward'
     CMD_speed = movement
     # ---------------------------

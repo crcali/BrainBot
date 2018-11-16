@@ -1,6 +1,7 @@
 //====================================================================
 // [Include files]
 #include <Arduino.h> // Arduino 1.0
+#include <Wire.h>
 
 //[CONSTANTS]
 // Default to Serial but allow to be defined to something else
@@ -49,6 +50,9 @@
 #define MAX_BODY_Y 100
 #endif
 
+const int MPU_addr=0x68;  // I2C address of the MPU-6050
+int16_t AcX,AcY,AcZ,Tmp,GyX,GyY,GyZ;
+
 //=============================================================================
 // Global - Local to this file only...
 //=============================================================================
@@ -87,6 +91,12 @@ void InputController::Init(void)
 
   // May need to init the Serial port here...
   SerSerial.begin(SERIAL_BAUD);
+
+  Wire.begin();
+  Wire.beginTransmission(MPU_addr);
+  Wire.write(0x6B);  // PWR_MGMT_1 register
+  Wire.write(0);     // set to zero (wakes up the MPU-6050)
+  Wire.endTransmission(true);
   
   g_BodyYOffset = 0;    
   g_BodyYShift = 0;
@@ -128,6 +138,9 @@ void InputController::ControlInput(void)
 
   input = SerSerial.read();
 
+  //=====================================================================================
+  // ULTRASONIC SENSOR //
+
   double RangeInInches;
   double RangeInCentimeters;
   pinMode(this_pin, OUTPUT);
@@ -145,9 +158,9 @@ void InputController::ControlInput(void)
   g_wSerialErrorCnt = 0;    // clear out error count...
 
   if (RangeInInches <= 51) {
-    SerSerial.print("     ");
-    SerSerial.print(RangeInInches);//0~157 inches
-    SerSerial.print(" cm");
+    //SerSerial.print("     ");
+    //SerSerial.print(RangeInInches);//0~157 inches
+    //SerSerial.print(" cm");
     if (RangeInInches <= 25) {
       if (g_InControlState.fRobotOn) {
         g_InControlState.TravelLength.z = (0);
@@ -159,14 +172,62 @@ void InputController::ControlInput(void)
     }
   }
 
+  //=====================================================================================
+  // IMU SENSOR //
+  if (g_InControlState.fRobotOn) {
+	  Wire.beginTransmission(MPU_addr);
+	  Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
+	  Wire.endTransmission(false);
+	  Wire.requestFrom(MPU_addr,14,true);  // request a total of 14 registers
+	  AcX=Wire.read()<<8|Wire.read();  // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)     
+	  AcY=Wire.read()<<8|Wire.read();  // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
+	  AcZ=Wire.read()<<8|Wire.read();  // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
+	  Tmp=Wire.read()<<8|Wire.read();  // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
+	  GyX=Wire.read()<<8|Wire.read();  // 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
+	  GyY=Wire.read()<<8|Wire.read();  // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
+	  GyZ=Wire.read()<<8|Wire.read();  // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
+	  //SerSerial.print("AcX = "); Serial.print(AcX);
+	  //SerSerial.print(" | AcY = "); Serial.print(AcY);
+	  //SerSerial.print(" | AcZ = "); Serial.print(AcZ);
+	  //SerSerial.print(" | Tmp = "); Serial.print(Tmp/340.00+36.53);  //equation for temperature in degrees C from datasheet
+	  //SerSerial.print(" | GyX = "); Serial.print(GyX);
+	  //SerSerial.print(" | GyY = "); Serial.print(GyY);
+	  //SerSerial.print(" | GyZ = "); Serial.println(GyZ);
+
+	  if ((GyX >= 20000) || (GyX <= -20000)) {
+	    SerSerial.print(" | GyX = "); Serial.print(GyX);
+	    if (g_InControlState.fRobotOn) {
+	        g_InControlState.TravelLength.z = (0);
+	        g_InControlState.TravelLength.x = (0);
+	        g_InControlState.TravelLength.y = (0);
+	        fAdjustLegPositions = true;
+        	MSound(3, 60, 2000, 80, 2250, 100, 2500);
+	      }
+	    }
+
+	   if ((GyY >= 20000) || (GyY <= -20000)) {
+	    SerSerial.print(" | GyY = "); Serial.print(GyY);
+	    if (g_InControlState.fRobotOn) {
+	        g_InControlState.TravelLength.z = (0);
+	        g_InControlState.TravelLength.x = (0);
+	        g_InControlState.TravelLength.y = (0);
+	        fAdjustLegPositions = true;
+        	MSound(3, 60, 2000, 80, 2250, 100, 2500);
+	      }
+	    }
+  }
+
+  //=====================================================================================
+
+  // MOVEMENT //
   if (input == 's' || input == 'S') {
     if (g_InControlState.fRobotOn) {
-      SerSerial.print("Off.");
+      //SerSerial.print("Off.");
       SerTurnRobotOff();
     } 
     else {
       //Turn on
-      SerSerial.print("Started.");
+      //SerSerial.print("Started.");
       g_InControlState.fRobotOn = 1;
       fAdjustLegPositions = true;
     }
@@ -237,7 +298,7 @@ void InputController::ControlInput(void)
   // Raise robot
   if (input == 'h' || input == 'H') {
     g_BodyYOffset += 10;
-    SerSerial.print("Height up.");
+    //SerSerial.print("Height up.");
 
       // And see if the legs should adjust...
       fAdjustLegPositions = true;
@@ -309,7 +370,7 @@ void InputController::ControlInput(void)
 
   //Move straight
   if (input == 'f' || input == 'F') {
-    SerSerial.print(" Moving forward");
+    //SerSerial.print(" Moving forward");
     g_InControlState.TravelLength.z = (255-128); 
   }
 

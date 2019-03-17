@@ -5,8 +5,7 @@ import signal
 import serial
 import peakutils.sig_mov
 #opens the serial port over Bluetooth
-sp = serial.Serial('/dev/cu.usbmodem14501', 38400, timeout=0)
-
+sp = serial.Serial('/dev/cu.usbmodem14401', 38400, timeout=0)
 
 #opens the serial port through a USB-to-Serial cable
 #sp = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
@@ -47,14 +46,16 @@ class RobotCommands(threading.Thread):
             if not self.shutdown_flag.is_set(): sp.write(str.encode('%i' % self.calcSpeed))
 
             read1 = sp.read()
-            print(read1)
             while (self.shutdown_flag.is_set() == False):
                 if sp.read() != read1:
-                    tdata = sp.read()           # Wait forever for anything
-                    time.sleep(1)              # Sleep (or inWaiting() doesn't give the correct value)
+                    f = open("Ultrasonic_Values.txt","w+")
+                    tdata = sp.read()           
+                    time.sleep(1)              
                     data_left = sp.inWaiting()  # Get the number of characters ready to be read
                     tdata += sp.read(data_left) # Do the read and combine it with the first character
                     print(tdata)
+                    f.write("%s" %tdata)
+                    f.close()    
 
 
         if self.command == 'left':

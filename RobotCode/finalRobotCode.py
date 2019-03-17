@@ -5,7 +5,7 @@ import signal
 import serial
 import peakutils.sig_mov
 #opens the serial port over Bluetooth
-sp = serial.Serial('/dev/cu.usbmodem14401', 38400, timeout=0)
+sp = serial.Serial('/dev/cu.usbmodem14501', 38400, timeout=0)
 
 
 #opens the serial port through a USB-to-Serial cable

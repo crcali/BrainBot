@@ -58,7 +58,7 @@ ax2 = plt.subplot(gs[1])
 line2, = ax2.bar(0, 0, width=0.2) # Returns a tuple of line objects, thus the comma
 plt.ylabel('Robot Speed')
 plt.xlim([-0.5, 0.5])
-plt.ylim((0,INVERT_SPEED-MIN_SPEED))
+plt.ylim((0,1))
 #plt.show()
 
 
@@ -66,7 +66,7 @@ plt.ylim((0,INVERT_SPEED-MIN_SPEED))
 # Register the signal handlers if robot is connected
 if have_robot:
     # open serial port
-    sp = serial.Serial('/dev/cu.usbmodem14401', 38400, timeout=0)
+    sp = serial.Serial('/dev/cu.usbmodem14501', 38400, timeout=0)
 
     #signal.signal(signal.SIGTERM, service_shutdown)
     #signal.signal(signal.SIGINT, service_shutdown)
@@ -103,11 +103,11 @@ while running is True:
     # fr_to_speed returns a float between 0 to 1, scaled to absolute max
     movement = fr_to_speed(curr_brain_signal, sig_max)
     # need to invert speed because small number is faster
-    movement = INVERT_SPEED - (movement*(MAX_SPEED-MIN_SPEED)+MIN_SPEED)
+    movement2 = INVERT_SPEED - (movement*(MAX_SPEED-MIN_SPEED)+MIN_SPEED)
 
     move_time = 5.0
     CMD_direction = 'forward'
-    CMD_speed = movement
+    CMD_speed = movement2
     # ---------------------------
 
     print(curr_neural_index, movement)

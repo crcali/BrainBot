@@ -4,12 +4,13 @@ import threading
 import signal
 import serial
 import peakutils.sig_mov
-#opens the serial port over Bluetooth
-sp = serial.Serial('/dev/cu.usbmodem14501', 38400, timeout=0)
 
+#opens the serial port over Bluetooth
+sp = serial.Serial('/dev/cu.usbmodem1451201', 38400, timeout=0)
 
 #opens the serial port through a USB-to-Serial cable
 #sp = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
+
 
 # Directions = '''
 # Enter your command in the following format: <forward | backward|left|right|stop> <speed (must be between 100 and 2000) (speed is not required if 'stop' is entered)>
@@ -17,12 +18,17 @@ sp = serial.Serial('/dev/cu.usbmodem14501', 38400, timeout=0)
 # Enter exit to close serial port and end program
 # '''
 
-class RobotCommands(threading.Thread):
-    def __init__(self, INPUT, SPEED):
+class QuadCommands(threading.Thread):
+    def __init__(self, INPUT, SPEED, ROBOT, STIMULATION, VOLTAGE, CURRENT, DURATION):
         threading.Thread.__init__(self)
         self.command = INPUT
         self.speed = SPEED
+        self.robot = ROBOT
         self.calcSpeed = SPEED // 500
+        self.stim = STIMULATION
+        self.voltage = VOLTAGE
+        self.current = CURRENT
+        self.duration = DURATION
         int(self.calcSpeed)
 
         # The shutdown_flag is a threading.Event object that
@@ -31,9 +37,11 @@ class RobotCommands(threading.Thread):
 
         # ... Other thread setup code here ...
         sp.write(str.encode('yyy'))
+
     def run(self):
         print('Thread #%s started' % self.ident)
-        print("temp = ", self.command)
+        print("command = ", self.command, " || speed = ", self.calcSpeed)
+        
         def defaultPosition():
             # set the servos to the neutral position
             sp.write(str.encode('q'))
@@ -50,11 +58,18 @@ class RobotCommands(threading.Thread):
             print(read1)
             while (self.shutdown_flag.is_set() == False):
                 if sp.read() != read1:
-                    tdata = sp.read()           # Wait forever for anything
-                    time.sleep(1)              # Sleep (or inWaiting() doesn't give the correct value)
-                    data_left = sp.inWaiting()  # Get the number of characters ready to be read
+                    tdata = sp.read() # Wait forever for anything
+                    time.sleep(1) # Sleep (or inWaiting() doesn't give the correct value)
+                    data_left = sp.inWaiting() # Get the number of characters ready to be read
                     tdata += sp.read(data_left) # Do the read and combine it with the first character
                     print(tdata)
+                    tdata.strip() # Remove all whitespaces
+                    firstValueString = tdata[3:4] # Get the first distance value reported
+                    firstValueInteger = ord(firstValue) # Convert string to integer
+                    if (firstValueInteger > 0): # Determine if it is close to a wall
+                        print('Command sent to Stimulator: %i, %i, %i' % self.voltage, self.current, self.duration)
+                        stim.write('%i, %i, %i' % self.voltage, self.current, self.duration) # Write the current, voltage, and duration to the stimjim
+
 
 
         if self.command == 'left':
@@ -116,7 +131,7 @@ def main():
                 if ((int(raw[1]) > 100 and int(raw[1]) < 2000)):
                     command=raw[0]
                     speed=raw[1]
-                    activethread=RobotCommands(command, speed)
+                    activethread=QuadCommands(command, speed)
                     activethread.start()
                 else:
                     print("Incorrect Format: <forward|backward> <speed>")
@@ -124,14 +139,14 @@ def main():
                 if (int(raw[1]) > 100 and int(raw[1]) < 2000):
                     command=raw[0]
                     speed=raw[1]
-                    activethread=RobotCommands(command, speed)
+                    activethread=QuadCommands(command, speed)
                     activethread.start()
                 else:
                     print("Incorrect Format: <right|left> <speed>")
             elif (len(raw) == 1 and (raw[0] == "stop")):
                 command=raw[0]
                 speed=0
-                activethread=RobotCommands(command, speed)
+                activethread=QuadCommands(command, speed)
                 activethread.start()
             else:
                 print("Invalid Length, should be: <forward|backward|right|left|stop> <speed>")

@@ -3,6 +3,10 @@
 // the servos.
 //====================================================================
 
+#ifdef ROBOT2
+
+#endif
+
 //Servo Pin numbers - May be SSC-32 or actual pins on main controller, depending on configuration.
 #ifdef QUADMODE
 const byte cCoxaPin[] PROGMEM = {
